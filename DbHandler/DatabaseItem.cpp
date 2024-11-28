@@ -6,19 +6,19 @@ DatabaseItem::DatabaseItem(std::string url, std::string ip, std::string longitud
     : url(std::move(url)), ip(std::move(ip)), longitude(std::move(longitude)),
       latitude(std::move(latitude)) {}
 
-std::string&
+std::string &
 DatabaseItem::getUrl() {
     return url;
 }
-std::string&
+std::string &
 DatabaseItem::getIp() {
     return ip;
 }
-std::string&
+std::string &
 DatabaseItem::getLongitude() {
     return longitude;
 }
-std::string&
+std::string &
 DatabaseItem::getLatitude() {
     return latitude;
 }

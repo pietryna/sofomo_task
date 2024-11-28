@@ -9,13 +9,13 @@ class DatabaseItem {
     DatabaseItem(std::string url, std::string ip, std::string longitude, std::string latitude);
     ~DatabaseItem() = default;
 
-    std::string&
+    std::string &
     getUrl();
-    std::string&
+    std::string &
     getIp();
-    std::string&
+    std::string &
     getLongitude();
-    std::string&
+    std::string &
     getLatitude();
  private:
     std::string url;

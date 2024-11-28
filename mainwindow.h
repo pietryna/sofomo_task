@@ -11,32 +11,26 @@
 
 class QLabel;
 
+class MainWindow : public QMainWindow {
+ Q_OBJECT
 
-class MainWindow : public QMainWindow
-{
-    Q_OBJECT
-
-public:
+ public:
     MainWindow();
 
-protected:
+ protected:
 
-
-private slots:
+ private slots:
     void addButtonPress();
 
-
-
-private:
+ private:
     QLabel *infoLabel;
-    QPushButton* addButton;
-    QPushButton* deleteButton;
-    QPushButton* provideButton;
-    QLineEdit* urlInput;
-    QLabel* geolocOut;
+    QPushButton *addButton;
+    QPushButton *deleteButton;
+    QPushButton *provideButton;
+    QLineEdit *urlInput;
+    QLabel *geolocOut;
 
     std::unique_ptr<DbHandler> dbHandler;
 };
-
 
 #endif
