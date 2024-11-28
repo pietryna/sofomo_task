@@ -5,6 +5,10 @@
 #include <QMainWindow>
 #include <QtWidgets>
 
+#include <memory>
+
+#include "DbHandler.hpp"
+
 class QLabel;
 
 
@@ -30,6 +34,8 @@ private:
     QPushButton* provideButton;
     QLineEdit* urlInput;
     QLabel* geolocOut;
+
+    std::unique_ptr<DbHandler> dbHandler;
 };
 
 
