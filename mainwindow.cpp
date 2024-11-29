@@ -68,7 +68,10 @@ MainWindow::MainWindow() {
     this->setWindowTitle(tr(MAIN_WINDOW));
     this->resize(640, 480);
 
+    // TODO: make it smarter
     dbHandler = std::make_unique<DbHandler>();
+    ipStackWrapper = std::make_unique<IpStackWrapper>();
+
 }
 
 void MainWindow::addButtonPress() {
@@ -77,14 +80,18 @@ void MainWindow::addButtonPress() {
     std::stringstream infoMsg{}, outMsg{};
     if (valid) {
         infoMsg << "Domain is valid and IPv4 is: " << ipv4 << "\n";
-        // TODO: Fetch data from ipstack
-        std::string longitude{"dummy1"}, latitude{"dummy2"};
+        auto [obtained, longitude, latitude] = ipStackWrapper->getGeoData(ipv4);
+        if(obtained)
         {
             if (!dbHandler->insertGeoLocData({input, ipv4, longitude, latitude})) {
                 infoMsg << "Failed to insert data into database";
             }
             outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
                    longitude << "\nLatitude: " << latitude;
+        }
+        else
+        {
+            infoMsg << "Failed to fetch geolocation data from ipstack.com";
         }
     } else {
         infoMsg << "Domain is invalid or not reachable\n";
@@ -129,9 +136,20 @@ void MainWindow::provideButtonPress() {
                        item.getLongitude() << "\nLatitude: " << item.getLatitude();
             }
         } else {
-            infoMsg << "No entry for IP: " << ipv4 << "\nFetching from outside";
-            // TODO: Fetch data from ipstack
-            std::string longitude{"dummy1"}, latitude{"dummy2"};
+            infoMsg << "No entry for IP: " << ipv4 << "\nFetching from outside\n";
+            auto [obtained, longitude, latitude] = ipStackWrapper->getGeoData(ipv4);
+            if(obtained)
+            {
+                if (!dbHandler->insertGeoLocData({input, ipv4, longitude, latitude})) {
+                    infoMsg << "Failed to insert data into database";
+                }
+                outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
+                       longitude << "\nLatitude: " << latitude;
+            }
+            else
+            {
+                infoMsg << "Failed to fetch geolocation data from ipstack.com";
+            }
             outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
                    longitude << "\nLatitude: " << latitude;
         }
