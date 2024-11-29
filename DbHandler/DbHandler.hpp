@@ -10,12 +10,12 @@ class DbHandler {
     DbHandler();
     ~DbHandler();
 
-    void insertGeoLocData(DatabaseItem item);
-    DatabaseItem fetchGeoLocData(const std::string &ip);
-    void removeGeoLocData(const std::string &ip);
+    bool insertGeoLocData(DatabaseItem item);
+    std::pair<bool, DatabaseItem> fetchGeoLocData(const std::string &ip);
+    bool removeGeoLocData(const std::string &ip);
+    bool isExistingGeoLocData(const std::string &ip);
 
  private:
-    bool isExistingGeoLocData(const std::string &ip);
     const std::string DatabaseName;
     sqlite3 *Database = nullptr;
 };

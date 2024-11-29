@@ -62,9 +62,9 @@ DbHandler::DbHandler()
 DbHandler::~DbHandler() {
     sqlite3_close_v2(Database);
 }
-void
+bool
 DbHandler::insertGeoLocData(DatabaseItem item) {
-
+    bool result = true;
     if (!isExistingGeoLocData(item.getIp())) {
         sqlite3_stmt *insert;
         if (SQLITE_OK
@@ -75,6 +75,7 @@ DbHandler::insertGeoLocData(DatabaseItem item) {
                                   &insert,
                                   nullptr)) {
             qInfo() << "Failed to prepare insert statement: " << sqlite3_errmsg(Database);
+            result = false;
         }
         if (
             (SQLITE_OK != sqlite3_bind_text(insert, 1, item.getUrl().c_str(), -1, SQLITE_STATIC)) ||
@@ -83,19 +84,22 @@ DbHandler::insertGeoLocData(DatabaseItem item) {
                 (SQLITE_OK != sqlite3_bind_text(insert, 4, item.getLatitude().c_str(), -1, SQLITE_STATIC))
             ) {
             qInfo() << "Failed to bind insert parameters: " << sqlite3_errmsg(Database);
+            result = false;
         }
         if (SQLITE_DONE != sqlite3_step(insert)) {
             qInfo() << "Failed execute statement: " << sqlite3_errmsg(Database);
+            result = false;
         }
         sqlite3_finalize(insert);
     } else {
         qInfo() << "Data for IP: " << item.getIp() << " is already existing in database.";
     }
-
+    return result;
 }
 
-DatabaseItem
+std::pair<bool, DatabaseItem>
 DbHandler::fetchGeoLocData(const std::string &ip) {
+    bool found = true;
     std::string url{}, longitude, latitude;
     sqlite3_stmt *fetch;
     if (SQLITE_OK
@@ -103,9 +107,11 @@ DbHandler::fetchGeoLocData(const std::string &ip) {
                               std::string("SELECT URL, IP, Longitude, Latitude FROM GeoData WHERE IP = ?;").c_str(),
                               -1, &fetch, nullptr)) {
         qInfo() << "Failed to prepare fetch statement: " << sqlite3_errmsg(Database);
+        found = false;
     }
     if (SQLITE_OK != sqlite3_bind_text(fetch, 1, ip.c_str(), -1, SQLITE_STATIC)) {
         qInfo() << "Failed to bind fetch parameters: " << sqlite3_errmsg(Database);
+        found = false;
     }
     if (SQLITE_ROW == sqlite3_step(fetch)) {
         url = reinterpret_cast<const char *>(sqlite3_column_text(fetch, 0));
@@ -113,8 +119,9 @@ DbHandler::fetchGeoLocData(const std::string &ip) {
         latitude = reinterpret_cast<const char *>(sqlite3_column_text(fetch, 3));
     } else {
         qInfo() << "No row found for IP: " << ip;
+        found = false;
     }
-    return DatabaseItem{url, ip, longitude, latitude};
+    return {found, DatabaseItem{url, ip, longitude, latitude}};
 }
 
 bool
@@ -137,8 +144,9 @@ DbHandler::isExistingGeoLocData(const std::string &ip) {
     return exists;
 }
 
-void
+bool
 DbHandler::removeGeoLocData(const std::string &ip) {
+    bool result = true;
     if (isExistingGeoLocData(ip)) {
         sqlite3_stmt *remove;
         if (SQLITE_OK
@@ -146,16 +154,19 @@ DbHandler::removeGeoLocData(const std::string &ip) {
                                   std::string("DELETE FROM GeoData WHERE IP = ?;").c_str(), -1, &remove,
                                   nullptr)) {
             qInfo() << "Failed to prepare remove statement: " << sqlite3_errmsg(Database);
+            result = false;
         }
         if (SQLITE_OK != sqlite3_bind_text(remove, 1, ip.c_str(), -1, SQLITE_STATIC)) {
             qInfo() << "Failed to bind remove parameters: " << sqlite3_errmsg(Database);
+            result = false;
         }
         if (SQLITE_DONE != sqlite3_step(remove)) {
             qInfo() << "Failed execute remove statement: " << sqlite3_errmsg(Database);
+            result = false;
         }
         sqlite3_finalize(remove);
     } else {
         qInfo() << "Row for IP: " << ip << " does not exist in database.";
     }
-
+    return result;
 }

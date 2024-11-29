@@ -1,6 +1,9 @@
 #include <QtWidgets>
 
+#include <sstream>
+
 #include "mainwindow.h"
+#include "InputHelper.hpp"
 
 MainWindow::MainWindow() {
     auto *centerWidget = new QWidget;
@@ -19,9 +22,11 @@ MainWindow::MainWindow() {
 
     deleteButton = new QPushButton();
     deleteButton->setText("Remove geo data");
+    QPushButton::connect(deleteButton, &QAbstractButton::pressed, this, &MainWindow::deleteButtonPress);
 
     provideButton = new QPushButton();
     provideButton->setText("Get geo data");
+    QPushButton::connect(provideButton, &QAbstractButton::pressed, this, &MainWindow::provideButtonPress);
 
     urlInput = new QLineEdit;
 
@@ -63,27 +68,79 @@ MainWindow::MainWindow() {
     this->setWindowTitle(tr(MAIN_WINDOW));
     this->resize(640, 480);
 
-    {
-        // TODO: Database handler playground
-        dbHandler = std::make_unique<DbHandler>();
-        dbHandler->insertGeoLocData({"test.pl", "1.2.3.4", "50", "18"});
-        dbHandler->insertGeoLocData({"test.com", "2.3.4.5", "51", "19"});
-        dbHandler->insertGeoLocData({"abc.info", "4.3.2.1", "52", "20"});
-        dbHandler->insertGeoLocData({"xyz.net", "7.6.5.4", "53", "21"});
-
-        auto item = dbHandler->fetchGeoLocData("7.6.5.4");
-        qInfo() << "Fetched: URL: " << item.getUrl() << ", IP: " << item.getIp() << ", Long: " << item.getLongitude()
-                << ", Lati: " << item.getLatitude();
-
-        dbHandler->removeGeoLocData("4.3.2.1");
-        dbHandler->removeGeoLocData("4.3.2.1");
-        item = dbHandler->fetchGeoLocData("4.3.2.1");
-        qInfo() << "Fetched: URL: " << item.getUrl() << ", IP: " << item.getIp() << ", Long: " << item.getLongitude()
-                << ", Lati: " << item.getLatitude();
-    }
+    dbHandler = std::make_unique<DbHandler>();
 }
 
 void MainWindow::addButtonPress() {
-    infoLabel->setText(urlInput->text());
+    auto input = urlInput->text().toStdString();
+    auto [valid, ipv4] = InputHelper::resolveUrl(input);
+    std::stringstream infoMsg{}, outMsg{};
+    if (valid) {
+        infoMsg << "Domain is valid and IPv4 is: " << ipv4 << "\n";
+        // TODO: Fetch data from ipstack
+        std::string longitude{"dummy1"}, latitude{"dummy2"};
+        {
+            if (!dbHandler->insertGeoLocData({input, ipv4, longitude, latitude})) {
+                infoMsg << "Failed to insert data into database";
+            }
+            outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
+                   longitude << "\nLatitude: " << latitude;
+        }
+    } else {
+        infoMsg << "Domain is invalid or not reachable\n";
+    }
+    infoLabel->setText(QString(infoMsg.str().c_str()));
+    geolocOut->setText(QString(outMsg.str().c_str()));
+}
+
+void MainWindow::deleteButtonPress() {
+    auto input = urlInput->text().toStdString();
+    auto [valid, ipv4] = InputHelper::resolveUrl(input);
+    std::stringstream infoMsg{};
+
+    if (valid) {
+        if (dbHandler->isExistingGeoLocData(ipv4)) {
+            if (dbHandler->removeGeoLocData(ipv4)) {
+                infoMsg << "Removed database entry for IP: " << ipv4;
+            } else {
+                infoMsg << "Failed to remove database entry for IP: " << ipv4;
+            }
+        } else {
+            infoMsg << "Domain not present in the database";
+        }
+    } else {
+        infoMsg << "Domain invalid";
+    }
+
+    infoLabel->setText(QString(infoMsg.str().c_str()));
+}
+
+void MainWindow::provideButtonPress() {
+    auto input = urlInput->text().toStdString();
+    auto [valid, ipv4] = InputHelper::resolveUrl(input);
+    std::stringstream infoMsg{}, outMsg{};
+
+    if (valid) {
+        if (dbHandler->isExistingGeoLocData(ipv4)) {
+            auto [found, item] = dbHandler->fetchGeoLocData(ipv4);
+            if (found) {
+                infoMsg << "Found database entry for IP: " << ipv4;
+                outMsg << "Domain: " << item.getUrl() << "\nIPv4: " << item.getIp() << "\nLongitude: " <<
+                       item.getLongitude() << "\nLatitude: " << item.getLatitude();
+            }
+        } else {
+            infoMsg << "No entry for IP: " << ipv4 << "\nFetching from outside";
+            // TODO: Fetch data from ipstack
+            std::string longitude{"dummy1"}, latitude{"dummy2"};
+            outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
+                   longitude << "\nLatitude: " << latitude;
+        }
+
+    } else {
+        infoMsg << "Domain invalid";
+    }
+
+    infoLabel->setText(QString(infoMsg.str().c_str()));
+    geolocOut->setText(QString(outMsg.str().c_str()));
 }
 

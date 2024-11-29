@@ -6,6 +6,7 @@ qt_standard_project_setup()
 
 add_subdirectory(sqlite-amalgamation-3470100)
 add_subdirectory(DbHandler)
+add_subdirectory(UrlHandler)
 
 add_executable(${PROJECT_NAME})
 
@@ -21,6 +22,7 @@ target_link_libraries(${PROJECT_NAME}
         Qt6::Gui
         Qt6::Widgets
         DbHandler
+        UrlHandler
 )
 
 target_include_directories(${PROJECT_NAME}

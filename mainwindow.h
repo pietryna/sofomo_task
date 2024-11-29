@@ -21,6 +21,8 @@ class MainWindow : public QMainWindow {
 
  private slots:
     void addButtonPress();
+    void deleteButtonPress();
+    void provideButtonPress();
 
  private:
     QLabel *infoLabel;
