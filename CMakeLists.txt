@@ -36,3 +36,5 @@ target_compile_definitions(${PROJECT_NAME}
         PRIVATE
         -DMAIN_WINDOW="${PROJECT_NAME}"
 )
+
+add_subdirectory(Tests)
