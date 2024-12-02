@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../DbHandler/DbHandler.hpp"
+#include "../Src/DbHandler/DbHandler.hpp"
 #include "Sqlite3_stubs.hpp"
 
 using testing::_;

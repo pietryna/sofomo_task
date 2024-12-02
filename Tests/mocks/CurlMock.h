@@ -3,7 +3,7 @@
 
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
-#include "../../IpStackWrapper/CurlWrapperIf.hpp"
+#include "../../Src/IpStackWrapper/CurlWrapperIf.hpp"
 
 class CurlMock: public CurlWrapperIf {
  public:

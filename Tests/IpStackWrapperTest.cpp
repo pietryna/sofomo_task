@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "../IpStackWrapper/IpStackWrapper.hpp"
+#include "../Src/IpStackWrapper/IpStackWrapper.hpp"
 #include "CurlMock.h"
 
 using testing::Return;

@@ -10,8 +10,8 @@ add_subdirectory(mocks)
 
 add_library(DbHandlerTest
         STATIC
-        ../DbHandler/DbHandler.cpp
-        ../DbHandler/DatabaseItem.cpp
+        ../Src/DbHandler/DbHandler.cpp
+        ../Src/DbHandler/DatabaseItem.cpp
         DbHandlerTest.cpp
 )
 target_link_libraries(DbHandlerTest
@@ -23,7 +23,7 @@ target_link_libraries(DbHandlerTest
 
 add_library(IpStackWrapperTest
         STATIC
-        ../IpStackWrapper/IpStackWrapper.cpp
+        ../Src/IpStackWrapper/IpStackWrapper.cpp
         IpStackWrapperTest.cpp
 )
 
