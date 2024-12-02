@@ -71,9 +71,6 @@ MainWindow::MainWindow() {
     vRightLayout->addWidget(geolocOut);
     rightWidget->setLayout(vRightLayout);
 
-    QString message = tr("Maybe needed later");
-    this->statusBar()->showMessage(message);
-
     this->setWindowTitle(tr(MAIN_WINDOW));
     this->resize(640, 480);
 

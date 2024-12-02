@@ -62,6 +62,16 @@ DbHandler::DbHandler()
 DbHandler::~DbHandler() {
     sqlite3_close_v2(Database);
 }
+DbHandler::DbHandler(DbHandler &&handler) noexcept:
+    DatabaseName{handler.DatabaseName},
+    Database{handler.Database} {}
+DbHandler &DbHandler::operator=(DbHandler &&handler) noexcept {
+    if (this != &handler) {
+        Database = handler.Database;
+        handler.Database = nullptr;
+    }
+    return *this;
+}
 bool
 DbHandler::insertGeoLocData(DatabaseItem item) {
     bool result = true;

@@ -10,6 +10,12 @@ class DbHandler {
     DbHandler();
     ~DbHandler();
 
+    DbHandler(const DbHandler& handler) = delete;
+    DbHandler& operator=(const DbHandler& handler) = delete;
+
+    DbHandler(DbHandler&& handler) noexcept ;
+    DbHandler& operator=(DbHandler&& handler) noexcept;
+
     bool insertGeoLocData(DatabaseItem item);
     std::pair<bool, DatabaseItem> fetchGeoLocData(const std::string &ip);
     bool removeGeoLocData(const std::string &ip);

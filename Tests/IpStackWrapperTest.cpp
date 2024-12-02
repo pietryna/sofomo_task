@@ -34,7 +34,7 @@ class IpStackWrapperTest : public testing::Test {
 };
 
 TEST_F(IpStackWrapperTest, incorrectCurlResponse) {
-    std::string request{"http://api.ipstack.com/" + ip + "?access_key=XXX"};
+    std::string request{"http://api.ipstack.com/" + ip + "?access_key=empty"};
     EXPECT_CALL(*curlMock, getHttpRequest(request)).WillOnce(Return(std::pair<bool, std::string>{false, ""}));
     auto [result, longitude, latitude] = ipStackWrapper->getGeoData(ip);
     ASSERT_EQ(false, result);
@@ -43,7 +43,7 @@ TEST_F(IpStackWrapperTest, incorrectCurlResponse) {
 }
 
 TEST_F(IpStackWrapperTest, correctIpStackResponse) {
-    std::string request{"http://api.ipstack.com/" + ip + "?access_key=XXX"};
+    std::string request{"http://api.ipstack.com/" + ip + "?access_key=empty"};
     EXPECT_CALL(*curlMock, getHttpRequest(request)).WillOnce(Return(std::pair<bool, std::string>{true, testOkVal}));
     auto [result, longitude, latitude] = ipStackWrapper->getGeoData(ip);
     ASSERT_EQ(true, result);
@@ -52,7 +52,7 @@ TEST_F(IpStackWrapperTest, correctIpStackResponse) {
 }
 
 TEST_F(IpStackWrapperTest, incorrectIpStackResponse) {
-    std::string request{"http://api.ipstack.com/" + ip + "?access_key=XXX"};
+    std::string request{"http://api.ipstack.com/" + ip + "?access_key=empty"};
     EXPECT_CALL(*curlMock, getHttpRequest(request)).WillOnce(Return(std::pair<bool, std::string>{true, testErrorVal}));
     auto [result, longitude, latitude] = ipStackWrapper->getGeoData(ip);
     ASSERT_EQ(false, result);

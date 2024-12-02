@@ -6,7 +6,7 @@
 
 using json = nlohmann::json;
 
-IpStackWrapper::IpStackWrapper(std::unique_ptr<CurlWrapperIf> curl) : apiKey("XXX"), curl(std::move(curl)) {
+IpStackWrapper::IpStackWrapper(std::unique_ptr<CurlWrapperIf> curl) : curl(std::move(curl)) {
     clearStr = [](std::string in) -> std::string {
         in.erase(
             std::remove(in.begin(), in.end(), '\"'),
@@ -14,6 +14,19 @@ IpStackWrapper::IpStackWrapper(std::unique_ptr<CurlWrapperIf> curl) : apiKey("XX
         );
         return in;
     };
+}
+IpStackWrapper::IpStackWrapper(IpStackWrapper &&wrapper) noexcept {
+    apiKey = std::move(wrapper.apiKey);
+    clearStr = std::move(wrapper.clearStr);
+    curl = std::move(wrapper.curl);
+}
+IpStackWrapper &IpStackWrapper::operator=(IpStackWrapper &&wrapper) noexcept {
+    if (this != &wrapper) {
+        apiKey = std::move(wrapper.apiKey);
+        clearStr = std::move(wrapper.clearStr);
+        curl = std::move(wrapper.curl);
+    }
+    return *this;
 }
 
 std::tuple<bool, std::string, std::string> IpStackWrapper::getGeoData(const std::string &ipv4) {
@@ -37,6 +50,6 @@ std::tuple<bool, std::string, std::string> IpStackWrapper::getGeoData(const std:
     }
     return {result, longitude, latitude};
 }
-void IpStackWrapper::setApiKey(const std::string& key) {
+void IpStackWrapper::setApiKey(const std::string &key) {
     apiKey = key;
 }
