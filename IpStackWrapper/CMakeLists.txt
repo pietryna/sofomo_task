@@ -13,6 +13,7 @@ add_library(IpStackWrapper STATIC)
 target_sources(IpStackWrapper
         PRIVATE
         IpStackWrapper.cpp
+        CurlWrapper.cpp
 )
 
 target_include_directories(IpStackWrapper

@@ -6,20 +6,21 @@
 #include <memory>
 #include <functional>
 
-#include <curl/curl.h>
+#include "CurlWrapperIf.hpp"
 
 
 class IpStackWrapper {
  public:
-    IpStackWrapper();
+    explicit IpStackWrapper(std::unique_ptr<CurlWrapperIf> curl);
     ~IpStackWrapper() = default;
 
     std::tuple<bool, std::string, std::string> getGeoData(const std::string &ipv4);
 
  private:
-    static size_t curlWriteCallback(void *contents, size_t size, size_t nmemb, std::string *userData);
     const std::string apiKey;
     std::function<std::string(std::string)> clearStr;
+
+    std::unique_ptr<CurlWrapperIf> curl;
 };
 
 #endif //SOFOMO_IPSTACKWRAPPER_IPSTACKWRAPPER_HPP_

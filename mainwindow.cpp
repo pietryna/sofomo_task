@@ -4,6 +4,7 @@
 
 #include "mainwindow.h"
 #include "InputHelper.hpp"
+#include "CurlWrapper.hpp"
 
 MainWindow::MainWindow() {
     auto *centerWidget = new QWidget;
@@ -70,7 +71,7 @@ MainWindow::MainWindow() {
 
     // TODO: make it smarter
     dbHandler = std::make_unique<DbHandler>();
-    ipStackWrapper = std::make_unique<IpStackWrapper>();
+    ipStackWrapper = std::make_unique<IpStackWrapper>(std::make_unique<CurlWrapper>());
 
 }
 
