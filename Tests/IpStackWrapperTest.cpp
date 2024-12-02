@@ -59,3 +59,11 @@ TEST_F(IpStackWrapperTest, incorrectIpStackResponse) {
     ASSERT_EQ("", longitude);
     ASSERT_EQ("", latitude);
 }
+
+TEST_F(IpStackWrapperTest, provideApiKey) {
+    std::string apiKey{"1234"};
+    ipStackWrapper->setApiKey(apiKey);
+    std::string request{"http://api.ipstack.com/" + ip + "?access_key="+ apiKey};
+    EXPECT_CALL(*curlMock, getHttpRequest(request)).WillOnce(Return(std::pair<bool, std::string>{true, testErrorVal}));
+    ipStackWrapper->getGeoData(ip);
+}

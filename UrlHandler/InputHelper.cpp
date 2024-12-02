@@ -1,5 +1,4 @@
 #include "InputHelper.hpp"
-#include <netinet/in.h>
 #include <netdb.h>
 
 #include <QDebug>

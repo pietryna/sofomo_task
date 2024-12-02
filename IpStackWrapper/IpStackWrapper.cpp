@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <nlohmann/json.hpp>
+#include <utility>
 
 using json = nlohmann::json;
 
@@ -35,4 +36,7 @@ std::tuple<bool, std::string, std::string> IpStackWrapper::getGeoData(const std:
         qInfo() << "Response parsing exception:" << e.what();
     }
     return {result, longitude, latitude};
+}
+void IpStackWrapper::setApiKey(const std::string& key) {
+    apiKey = key;
 }

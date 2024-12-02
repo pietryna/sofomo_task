@@ -30,6 +30,13 @@ MainWindow::MainWindow() {
     QPushButton::connect(provideButton, &QAbstractButton::pressed, this, &MainWindow::provideButtonPress);
 
     urlInput = new QLineEdit;
+    apiKey = new QInputDialog;
+    apiKey->setCancelButtonText("Clear key");
+    apiKey->setOkButtonText("Submit key");
+    apiKey->setLabelText("Provide IpStack API key");
+    apiKey->setInputMode(QInputDialog::TextInput);
+    QInputDialog::connect(apiKey, &QInputDialog::textValueSelected, this, &MainWindow::submitApiKey);
+    QInputDialog::connect(apiKey, &QDialog::rejected, this, &MainWindow::clearApiKey);
 
     geolocOut = new QLabel;
     geolocOut->setText("Text");
@@ -39,6 +46,7 @@ MainWindow::MainWindow() {
     auto *mainLayout = new QVBoxLayout;
     auto *controlWidget = new QWidget;
     centerWidget->setLayout(mainLayout);
+    mainLayout->addWidget(apiKey);
     mainLayout->addWidget(infoLabel);
     mainLayout->addWidget(controlWidget);
 
@@ -69,7 +77,6 @@ MainWindow::MainWindow() {
     this->setWindowTitle(tr(MAIN_WINDOW));
     this->resize(640, 480);
 
-    // TODO: make it smarter
     dbHandler = std::make_unique<DbHandler>();
     ipStackWrapper = std::make_unique<IpStackWrapper>(std::make_unique<CurlWrapper>());
 
@@ -82,16 +89,13 @@ void MainWindow::addButtonPress() {
     if (valid) {
         infoMsg << "Domain is valid and IPv4 is: " << ipv4 << "\n";
         auto [obtained, longitude, latitude] = ipStackWrapper->getGeoData(ipv4);
-        if(obtained)
-        {
+        if (obtained) {
             if (!dbHandler->insertGeoLocData({input, ipv4, longitude, latitude})) {
                 infoMsg << "Failed to insert data into database";
             }
             outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
                    longitude << "\nLatitude: " << latitude;
-        }
-        else
-        {
+        } else {
             infoMsg << "Failed to fetch geolocation data from ipstack.com";
         }
     } else {
@@ -139,16 +143,13 @@ void MainWindow::provideButtonPress() {
         } else {
             infoMsg << "No entry for IP: " << ipv4 << "\nFetching from outside\n";
             auto [obtained, longitude, latitude] = ipStackWrapper->getGeoData(ipv4);
-            if(obtained)
-            {
+            if (obtained) {
                 if (!dbHandler->insertGeoLocData({input, ipv4, longitude, latitude})) {
                     infoMsg << "Failed to insert data into database";
                 }
                 outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
                        longitude << "\nLatitude: " << latitude;
-            }
-            else
-            {
+            } else {
                 infoMsg << "Failed to fetch geolocation data from ipstack.com";
             }
             outMsg << "Domain: " << InputHelper::extractDomain(input) << "\nIPv4: " << ipv4 << "\nLongitude: " <<
@@ -163,3 +164,12 @@ void MainWindow::provideButtonPress() {
     geolocOut->setText(QString(outMsg.str().c_str()));
 }
 
+void MainWindow::submitApiKey(const QString &input) {
+    apiKey->setHidden(false);
+    ipStackWrapper->setApiKey(input.toStdString());
+}
+
+void MainWindow::clearApiKey() {
+    apiKey->setHidden(false);
+    apiKey->setTextValue("");
+}

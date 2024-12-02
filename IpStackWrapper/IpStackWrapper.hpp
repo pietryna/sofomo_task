@@ -15,9 +15,10 @@ class IpStackWrapper {
     ~IpStackWrapper() = default;
 
     std::tuple<bool, std::string, std::string> getGeoData(const std::string &ipv4);
+    void setApiKey(const std::string& key);
 
  private:
-    const std::string apiKey;
+    std::string apiKey;
     std::function<std::string(std::string)> clearStr;
 
     std::unique_ptr<CurlWrapperIf> curl;
