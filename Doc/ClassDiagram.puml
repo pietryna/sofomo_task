@@ -1,0 +1,87 @@
+@startuml
+
+class QLabel
+class QPushButton
+class QLineEdit
+class QInputDialog
+
+class MainWindow {
+    - QLabel *infoLabel
+    - QPushButton *addButton
+    - QPushButton *deleteButton
+    - QPushButton *provideButton
+    - QLineEdit *urlInput
+    - QLabel *geolocOut
+    - QInputDialog *apiKey
+    - std::unique_ptr<DbHandler> dbHandler
+    - std::unique_ptr<IpStackWrapper> ipStackWrapper
+
+    + MainWindow()
+    -- Slots --
+    - void addButtonPress()
+    - void deleteButtonPress()
+    - void provideButtonPress()
+    - void submitApiKey(const QString &)
+    - void clearApiKey()
+}
+
+class DbHandler {
+    - std::string DatabaseName
+    - sqlite3* Database
+
+    + DbHandler()
+    + ~DbHandler()
+    + DbHandler(DbHandler &&handler) noexcept
+    + DbHandler& operator=(DbHandler &&handler) noexcept
+
+    + bool insertGeoLocData(DatabaseItem item)
+    + std::pair<bool, DatabaseItem> fetchGeoLocData(const std::string &ip)
+    + bool isExistingGeoLocData(const std::string &ip)
+    + bool removeGeoLocData(const std::string &ip)
+}
+
+class DatabaseItem {
+    - std::string url
+    - std::string ip
+    - std::string longitude
+    - std::string latitude
+
+    + DatabaseItem(std::string url, std::string ip, std::string longitude, std::string latitude)
+    + std::string& getUrl()
+    + std::string& getIp()
+    + std::string& getLongitude()
+    + std::string& getLatitude()
+}
+
+class IpStackWrapper {
+    - std::string apiKey
+    - std::function<std::string(std::string)> clearStr
+    - std::unique_ptr<CurlWrapperIf> curl
+
+    + IpStackWrapper(std::unique_ptr<CurlWrapperIf> curl)
+    + IpStackWrapper(IpStackWrapper &&wrapper) noexcept
+    + IpStackWrapper& operator=(IpStackWrapper &&wrapper) noexcept
+
+    + std::tuple<bool, std::string, std::string> getGeoData(const std::string &ipv4)
+    + void setApiKey(const std::string &key)
+}
+interface CurlWrapperIf {
+    + std::pair<bool, std::string> getHttpRequest(const std::string &request)
+}
+
+class CurlWrapper {
+    + std::pair<bool, std::string> getHttpRequest(const std::string& request) override
+    + ~CurlWrapper()
+    - static size_t curlWriteCallback(void *contents, size_t size, size_t nmemb, std::string *userData)
+}
+
+CurlWrapper --|> CurlWrapperIf
+IpStackWrapper "1" --> "1" CurlWrapperIf : "uses"
+DbHandler "1" --> "*" DatabaseItem : "Manages"
+MainWindow --> QLabel
+MainWindow --> QPushButton
+MainWindow --> QLineEdit
+MainWindow --> QInputDialog
+MainWindow --> DbHandler
+MainWindow --> IpStackWrapper
+@enduml

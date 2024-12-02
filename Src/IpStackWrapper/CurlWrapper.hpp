@@ -7,7 +7,6 @@
 
 class CurlWrapper : public CurlWrapperIf {
  public:
-//    CurlWrapper() = default;
     ~CurlWrapper() override = default;
     std::pair<bool, std::string> getHttpRequest(const std::string &request) override;
 
